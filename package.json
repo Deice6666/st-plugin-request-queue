@@ -1,0 +1,10 @@
+{
+    "name": "st-request-queue",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "description": "让各个插件的生成请求按自定义顺序串行执行的 SillyTavern 扩展",
+    "scripts": {
+        "test": "node --test test/"
+    }
+}

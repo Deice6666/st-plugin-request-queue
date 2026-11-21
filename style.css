@@ -1,0 +1,264 @@
+/* 插件请求队列 —— 设置面板样式
+   折叠部分完全复用 SillyTavern 原生的 .inline-drawer / .inline-drawer-header /
+   .inline-drawer-content，这里只给自己新增的控件加样式。 */
+
+.rq-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 标题行里的“已启用”小标签 */
+.rq-state {
+    font-size: 0.78em;
+    font-weight: 500;
+    padding: 1px 8px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    vertical-align: middle;
+}
+
+.rq-state.rq-on {
+    color: #63d2a8;
+    border-color: #2f7a5e;
+    background: rgba(99, 210, 168, 0.12);
+}
+
+.rq-state.rq-off {
+    color: #d08b8b;
+    border-color: #7a3b3b;
+    background: rgba(208, 139, 139, 0.12);
+}
+
+/* 面板内容区第一行：总开关 */
+.rq-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+/* 行内小按钮（例如“清空记录”） */
+.rq-btn.rq-inline {
+    margin-left: 6px;
+    padding: 1px 8px;
+    font-size: 0.85em;
+    vertical-align: baseline;
+}
+
+.rq-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    cursor: pointer;
+    font-size: 0.92em;
+}
+
+.rq-note,
+.rq-hint {
+    font-size: 0.82em;
+    line-height: 1.5;
+    opacity: 0.72;
+}
+
+.rq-note {
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-left: 3px solid rgba(99, 210, 168, 0.6);
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+}
+
+.rq-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 6px;
+}
+
+.rq-section:last-child {
+    margin-bottom: 0;
+}
+
+.rq-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.92em;
+}
+
+.rq-actions {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.rq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 8px;
+}
+
+.rq-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    font-size: 0.85em;
+}
+
+.rq-field.rq-check {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.rq-field.rq-wide {
+    width: 100%;
+}
+
+.rq-field > span {
+    opacity: 0.8;
+}
+
+.rq-field input[type="number"],
+.rq-field select,
+.rq-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.rq-field textarea {
+    font-family: var(--mono-font, monospace);
+    font-size: 0.92em;
+    resize: vertical;
+}
+
+.rq-btn {
+    padding: 2px 9px;
+    font-size: 0.82em;
+    line-height: 1.5;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+    cursor: pointer;
+}
+
+.rq-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.rq-btn:disabled {
+    opacity: 0.32;
+    cursor: default;
+}
+
+.rq-btn.rq-danger:hover:not(:disabled) {
+    background: rgba(208, 90, 90, 0.28);
+    border-color: rgba(208, 90, 90, 0.6);
+}
+
+.rq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.rq-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    font-size: 0.85em;
+}
+
+.rq-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.rq-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--mono-font, monospace);
+}
+
+.rq-meta {
+    flex: 1 1 100%;
+    order: 10;
+    min-width: 0;
+    max-width: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.82em;
+    opacity: 0.6;
+}
+
+.rq-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 0.92em;
+    opacity: 0.85;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.rq-monitor {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: var(--mono-font, monospace);
+    font-size: 0.82em;
+    line-height: 1.55;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.22);
+    max-height: 190px;
+    overflow-y: auto;
+    word-break: break-all;
+}
+
+.rq-mon-head {
+    color: #63d2a8;
+}
+
+.rq-mon-wait {
+    opacity: 0.78;
+}
+
+.rq-mon-hist {
+    opacity: 0.52;
+    border-top: 1px dashed rgba(255, 255, 255, 0.14);
+    padding-top: 3px;
+}
+
+.rq-stack {
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 11px;
+    line-height: 1.45;
+    max-height: 150px;
+    overflow: auto;
+    margin: 4px 0 0;
+    padding: 6px 8px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--SmartThemeBodyColor, #ccc);
+}

@@ -1,0 +1,126 @@
+<div class="rq-panel inline-drawer" id="rq_panel">
+    <div class="inline-drawer-toggle inline-drawer-header">
+        <b>
+            插件请求队列
+            <span id="rq_summary" class="rq-state rq-on">已启用</span>
+        </b>
+        <div id="rq_caret" class="inline-drawer-icon fa-solid fa-circle-chevron-down down interactable"
+            tabindex="0" role="button"></div>
+    </div>
+
+    <div class="inline-drawer-content rq-body" id="rq_body">
+        <div class="rq-top">
+            <label class="rq-switch" title="总开关：关掉后所有请求恢复成原来的并行发送">
+                <input type="checkbox" id="rq_enabled">
+                <span>启用请求队列</span>
+            </label>
+        </div>
+
+        <div class="rq-note">
+            所有插件发往模型的生成请求都会先在这里排队：上一个请求彻底返回（流式输出读完）之后，才轮到下一个。
+            这样就不会出现两个插件同时往正文里插入内容的情况。
+        </div>
+
+        <div class="rq-section">
+            <div class="rq-section-title">调度方式</div>
+            <div class="rq-grid">
+                <label class="rq-field">
+                    <span>顺序模式</span>
+                    <select id="rq_mode">
+                        <option value="priority">按下面的排序优先（推荐）</option>
+                        <option value="fifo">严格先来先到（不看排序）</option>
+                    </select>
+                </label>
+                <label class="rq-field rq-check">
+                    <span>SillyTavern 本身的生成也排队</span>
+                    <input type="checkbox" id="rq_queue_core">
+                </label>
+                <label class="rq-field">
+                    <span>交接间隔 (ms)</span>
+                    <input type="number" id="rq_settle" min="0" max="5000" step="50">
+                </label>
+                <label class="rq-field">
+                    <span>单请求超时 (ms)</span>
+                    <input type="number" id="rq_timeout" min="0" max="3600000" step="1000">
+                </label>
+            </div>
+            <div class="rq-hint">
+                交接间隔：上一个请求结束后多等一会儿再放行下一个，给插件留出“把结果写进正文”的时间。默认 200ms，插不进就调到 500~1000。
+                超时：某个请求卡住超过这个时间就强制放行，避免整条队列被一个坏请求拖死。默认 10 分钟，填 0 表示不限。
+            </div>
+        </div>
+
+        <div class="rq-section">
+            <div class="rq-section-title">
+                请求顺序
+                <span class="rq-actions">
+                    <button type="button" class="rq-btn" id="rq_refresh" title="重新读取已安装的插件列表">刷新列表</button>
+                    <button type="button" class="rq-btn" id="rq_defaults" title="清空自定义排序，全部按安装顺序排">恢复默认</button>
+                </span>
+            </div>
+            <div class="rq-hint">
+                只列出真的发过生成请求的插件：纯界面类的（主题、按钮、字体、美化…）不会出现在这里。
+                从上到下就是优先级：越靠上越先拿到请求权。
+                取消勾选“排队”的插件会被完全放行（不排队，想什么时候发就什么时候发）。
+            </div>
+            <label class="rq-field rq-check">
+                <span>只显示发过请求的（推荐）</span>
+                <input type="checkbox" id="rq_only_active">
+            </label>
+            <div class="rq-hint">
+                取消勾选就列出全部已安装插件和脚本，方便提前排顺序 —— 从没发过请求的也一并显示。
+                <button type="button" class="rq-btn rq-inline" id="rq_forget" title="清空“发过请求”的记录，列表会变回空的">清空记录</button>
+            </div>
+            <div id="rq_sort_list" class="rq-list"></div>
+            <div class="rq-hint" id="rq_empty_hint" hidden>
+                这里还是空的：等哪个插件第一次发请求，它就会自动出现在上面。
+            </div>
+        </div>
+
+        <div class="rq-section">
+            <div class="rq-section-title">附加规则</div>
+            <label class="rq-field rq-wide">
+                <span>额外要排队的接口（每行一条，支持 /正则/）</span>
+                <textarea id="rq_extra" rows="3" placeholder="/api/backends/images/generate&#10;/api/plugins/some-plugin/run"></textarea>
+            </label>
+            <div class="rq-hint">
+                默认只拦生成正文的那几个接口。如果有插件用自定义接口也会返回内容插正文，把它的地址片段写进来。
+            </div>
+            <label class="rq-field rq-wide">
+                <span>“转发层”插件（每行一个目录名，不算发起者）</span>
+                <textarea id="rq_relays" rows="2" placeholder="LittleWhiteBox"></textarea>
+            </label>
+            <div class="rq-hint">
+                有些插件会全局包一层 fetch（小白X 的调试面板、消息预览就是这样），它的栈帧老是贴在我们外面，
+                会让所有请求都算成它发的。填在这里的插件会被跳过，请求继续往上找真正的发起者。
+                本次会话自动认出来的：<span id="rq_relays_auto">（暂无）</span>
+            </div>
+            <label class="rq-field rq-check">
+                <span>脚本运行时里的每个脚本单独排一行</span>
+                <input type="checkbox" id="rq_split_scripts">
+            </label>
+            <div class="rq-hint">
+                JS-Slash-Runner 会把每个用户脚本放在自己的 iframe 里跑，脚本也会往模型发请求。
+                勾上这里，每个脚本就在上面的顺序表里独占一行，能单独给它排先后；
+                不勾则统一记在 JS-Slash-Runner 名下。
+                已认出的脚本：<span id="rq_scripts_auto">（还没发现脚本）</span>
+                <button type="button" class="rq-btn rq-inline" id="rq_rescan">重新扫描脚本</button>
+            </div>
+            <label class="rq-field rq-check">
+                <span>输出调试日志到控制台（F12）</span>
+                <input type="checkbox" id="rq_debug">
+            </label>
+        </div>
+
+        <div class="rq-section">
+            <div class="rq-section-title">
+                实时状态
+                <span class="rq-actions">
+                    <button type="button" class="rq-btn" id="rq_reset_stats" title="清零统计">清零</button>
+                    <button type="button" class="rq-btn rq-danger" id="rq_flush" title="丢弃所有等待中的请求">清空队列</button>
+                </span>
+            </div>
+            <div id="rq_monitor" class="rq-monitor">队列未初始化</div>
+        </div>
+    </div>
+</div>
